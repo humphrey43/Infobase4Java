@@ -2,12 +2,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <name>Infobase Core</name>
+  <description>Core of the Infobase classes</description>
   <groupId>Infobase.Solutions</groupId>
   <artifactId>solutions.infobase.core</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>solutions.infobase.core</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -27,3 +28,4 @@
   	</dependency>
   </dependencies>
 </project>
+
