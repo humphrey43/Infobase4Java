@@ -4,7 +4,7 @@
 
   <name>Infobase Core</name>
   <description>Core of the Infobase classes</description>
-  <groupId>Infobase.Solutions</groupId>
+  <groupId>Solutions.Infobase</groupId>
   <artifactId>solutions.infobase.core</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
