@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<configuration>
+	<dbconfig>
+		<url>memory:demo</url>
+		<userid>admin</userid>
+		<password>admin</password>
+		<databaseFactory>solutions.infobase.orientdb.InfobaseDatabaseFactoryOrientDB</databaseFactory>
+		<documentFactory>solutions.infobase.orientdb.InfobaseDocumentFactoryOrientDB</documentFactory>
+	</dbconfig>
+</configuration>

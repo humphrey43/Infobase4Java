@@ -2,13 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <name>Infobase Core</name>
-  <description>Core of the Infobase classes</description>
   <groupId>Solutions.Infobase</groupId>
-  <artifactId>solutions.infobase.core</artifactId>
+  <artifactId>solutions.infobase.meta</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <name>solutions.infobase.meta</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -16,11 +15,16 @@
   </properties>
 
   <dependencies>
-  	<dependency>
-  		<groupId>commons-configuration</groupId>
-  		<artifactId>commons-configuration</artifactId>
-  		<version>1.10</version>
-  	</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>Solutions.Infobase</groupId>
+    	<artifactId>solutions.infobase.core</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>
-
