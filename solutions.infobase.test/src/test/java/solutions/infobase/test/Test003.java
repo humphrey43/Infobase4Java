@@ -24,14 +24,14 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
  *
  */
 @RunWith(TestRunner.class)
-public class Test002 extends InfobaseTest {
+public class Test003 extends InfobaseTest {
 
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-//		System.out.println("setUpBeforeClass1");
+		System.out.println("setUpBeforeClass1");
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class Test002 extends InfobaseTest {
 	 */
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-//		System.out.println("tearDownAfterClass1");
+		System.out.println("tearDownAfterClass1");
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class Test002 extends InfobaseTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-//		System.out.println("setUp1");
+		System.out.println("setUp1");
 	}
 
 	/**
@@ -55,19 +55,21 @@ public class Test002 extends InfobaseTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-//		System.out.println("tearDown1");
+		System.out.println("tearDown1");
 	}
 
 	@Test
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
-		System.out.println("test001");
-		database.assertDocumentType("test.TestClass1");
-//		database.assertRelationshipType("test.TestEdge1");
+		System.out.println("test003");
+		database.initBasicMetadata();
+//		database.assertDocumentType("meta.ObjectClass");
+//		database.assertDocumentType("meta.Attribute");
+//		database.assertRelationshipType("meta.has");
 		
-		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass1");
+		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("meta.InfoObject");
 //		OClass tc3 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass3");
-		assertEquals("test.TestClass1", tc2.getName());
+		assertEquals("meta.InfoObject", tc2.getName());
 //		assertEquals("test.TestClass3", tc3.getName());
 //		assertEquals("de.pch.frames.test.TestClass1", tc3.getClass().getSuperclass().getCanonicalName());
 //		assertEquals("test.TestClass1", tc2.getSuperClass().getName());

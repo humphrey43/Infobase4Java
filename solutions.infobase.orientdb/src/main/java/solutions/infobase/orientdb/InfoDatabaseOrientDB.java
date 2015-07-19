@@ -1,37 +1,22 @@
 package solutions.infobase.orientdb;
 
-import org.apache.commons.configuration.Configuration;
-
-import solutions.infobase.core.database.InfobaseDatabase;
+import solutions.infobase.core.database.InfoDatabaseBasic;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
-import solutions.infobase.core.interfaces.IDocumentClass;
+import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
+import solutions.infobase.core.interfaces.InfoClass;
+import solutions.infobase.core.interfaces.InfoObjectFactory;
 
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
-@SuppressWarnings("deprecation")
-public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
+public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 
-	private String dburl ;
-	private String userid;
-	private String password;
-	
-	Graph graphdb = null;
-    protected boolean inError;
-    
-	
-	public InfobaseDatabaseOrientDB(Configuration config) {
-		super(config);
-		dburl = config.getString("dbconfig.url", "");
-		userid = config.getString("dbconfig.userid", "");
-		password = config.getString("dbconfig.password", "");
-		createConnection();
+	OrientGraph graphdb = null;
+
+	public InfoDatabaseOrientDB(OrientGraph graphdb, InfoObjectFactory infoObjectFactory) {
+		super(infoObjectFactory);
+		this.graphdb = graphdb;
         setOk();
         useCounter = 0L;
 	}
@@ -41,16 +26,10 @@ public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
 		
 	}
 
-	public void close() throws InfobaseDatabaseException {
-		// TODO Auto-generated method stub
-		
+	public void close() throws InfobaseDatabaseRuntimeException {
+		this.graphdb.shutdown();
 	}
 
-	public void rollback() throws InfobaseDatabaseException {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	public Object getRawDatabase() {
 		return graphdb;
 	}
@@ -63,9 +42,6 @@ public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-
-	protected long useCounter = 0;
-    protected Exception lastException = null;
 
 //	public OrientGraph getOrientGraph() throws DatabaseFrameException {
 //		assertConnectionOpened();
@@ -85,119 +61,6 @@ public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
 //        useCounter = 0L;
 //	}
 //	
-    public long useConnection() throws InfobaseDatabaseException {
-		assertConnectionOpened();
-        useCounter++;
-        return useCounter;
-    }
-
-    public void releaseConnection(long useCount) throws InfobaseDatabaseException {
-        if (useCount == useCounter) {
-            useCounter--;
-            if (useCounter == 0L) {
-                assertConnectionClosed();
-            }
-        } else {
-        	InfobaseDatabaseException e = new InfobaseDatabaseException("falsche Reihenfolge beim Freigeben");
-            setInError(e);
-            assertConnectionClosed();
-            throw e;
-        }
-    }
-
-   public void startTransaction() throws InfobaseDatabaseException {
-        boolean erg = false;
-        if (useCounter == 0L) {
-        	assertConnectionOpened();
-        	graphdb.begin(TXTYPE.OPTIMISTIC);
-        	useCounter++;
-            erg = true;
-        }
-    }
-
-    public void endTransaction() throws InfobaseDatabaseException {
-        releaseConnection(1L);
-    }
-
-    public boolean isClosed() {
-        boolean erg = true;
-        try {
-        	if (graphdb != null) {
-        		erg = false; 
-        	}
-        }
-        catch (Exception exception) { }
-        return erg;
-    }
-	
-    protected void assertConnectionOpened() throws InfobaseDatabaseException {
-        if (graphdb == null) {
-            createConnection();
-        }
-        if (graphdb != null && isClosed()) {
-            openConnection();
-            setOk();
-        }
-    }
-    
-	public void closeConnection() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void openConnection() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@SuppressWarnings("deprecation")
-	protected void createConnection() throws InfobaseDatabaseException {
-		if (graphdb == null) {
-			graphdb = ODatabaseDocumentPool.global().acquire(dburl, userid, password);
-		}
-	}
-
-	public void assertConnectionClosed() throws InfobaseDatabaseException {
-        if (graphdb != null) {
-        	if (inError) {
-        		graphdb.rollback();
-        	} else {
-        		graphdb.commit();
-        	}
-        	graphdb.close();
-        	graphdb = null;
-        }
-        useCounter = 0L;
-    }
-    public boolean isInError() {
-        return inError;
-    }
-
-    protected void setOk() {
-        inError = false;
-        lastException = null;
-    }
-
-    public void setInError(Exception e) {
-        if (lastException == null) {
-            lastException = e;
-        }
-        inError = true;
-    }
-
-    public void setInError() {
-        inError = true;
-    }
-
-    public void finished() throws InfobaseDatabaseException {
-    	assertConnectionClosed();
-    	graphdb.close();
-    }
-
-	public void commit() throws InfobaseDatabaseException {
-		graphdb.commit();
-	}
-
 	public void assertDocumentType(String documentClassName) throws InfobaseDatabaseException {
 		String name1 = documentClassName;
 		int p = name1.lastIndexOf(".");
@@ -208,7 +71,7 @@ public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
 		p = name2.lastIndexOf(".",p-1);
 		name2 = name2.substring(p+1);
 //		if (name2.equals("core.FrameObject")) {
-			assertObjectType(name1);
+			assertObjectType(documentClassName);
 //		} else {
 //			assertObjectType(name1, name2);
 //		}
@@ -248,42 +111,42 @@ public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
 		return erg;
 	}
 	
-	public void assertObjectType(String name) throws InfobaseDatabaseException {
-		OClass c = graphdb.getUnderlying().getUnderlying().getVertexType(name);
-		if (c == null) {
-			graphdb.createVertexType(name);
-		}
-		
-	}
-	
-	public void assertObjectType(String name, String superclass) throws InfobaseDatabaseException {
+	public OClass assertObjectType(String name) throws InfobaseDatabaseException {
 		OClass c = graphdb.getVertexType(name);
 		if (c == null) {
-			graphdb.createVertexType(name, superclass);
+//			InfobaseDatabaseFactoryOrientDB factory = (InfobaseDatabaseFactoryOrientDB) InfobaseDatabase.getFactory(databaseName);
+//			InfobaseDatabaseOrientDB db = (InfobaseDatabaseOrientDB) factory.newDatabase();
+//			boolean isActive = graphdb.getRawGraph().getTransaction().isActive();
+//			if (isActive) graphdb.getRawGraph().commit();
+			c = graphdb.createVertexType(name);
+//			if (isActive) graphdb.begin();
+//			OrientGraphNoTx dbNoTx = factory.newDatabaseNoTx();
+//			dbNoTx.createVertexType(name);
+//			dbNoTx.shutdown();
 		}
-		
+		return c;
 	}
+	
+//	public void assertObjectType(String name, String superclass) throws InfobaseDatabaseException {
+//		OClass c = graphdb.getVertexType(name);
+//		if (c == null) {
+//			graphdb.createVertexType(name, superclass);
+//		}
+//	}
 	
 	public void assertRelationType(String name) throws InfobaseDatabaseException {
 		OClass c = graphdb.getEdgeType(name);
 		if (c == null) {
 			graphdb.createEdgeType(name);
 		}
-		
 	}
 	
 	public void assertRelationType(String name, String superclass) throws InfobaseDatabaseException {
-		OClass c = graphdb.getEdgeType(name);
-		if (c == null) {
-			graphdb.createEdgeType(name, superclass);
-		}
-		
-	}
-
-	@Override
-	public IDocumentClass readDocumentClass(String classname) throws InfobaseDatabaseException {
-		// TODO Auto-generated method stub
-		return null;
+//		OClass c = graphdb.getEdgeType(name);
+//		if (c == null) {
+//			graphdb.createEdgeType(name, superclass);
+//		}
+//		
 	}
 
 //	public List<FrameObject> queryObjects(String query) throws DatabaseFrameException {
@@ -337,4 +200,52 @@ public class InfobaseDatabaseOrientDB extends InfobaseDatabase {
 //		return erg;
 //	}
 
+	@Override
+	public void initBasicMetadata() {
+		try {
+			assertDocumentType("meta.InfoObject");
+			assertDocumentType("meta.InfoClass");
+			assertDocumentType("meta.InfoAttribute");
+			
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public InfoClass readInfoClass(String classname)
+			throws InfobaseDatabaseException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+    public boolean isClosed() {
+        boolean erg = true;
+       	if (graphdb != null) {
+       		erg = graphdb.isClosed(); 
+        }
+        return erg;
+    }
+	
+	@Override
+	public void commit() throws InfobaseDatabaseException {
+		graphdb.commit();
+	}
+
+	@Override
+	public void rollback() throws InfobaseDatabaseException {
+		graphdb.rollback();
+	}
+
+	@Override
+	public void finish() {
+		graphdb.shutdown();
+	}
+
+	@Override
+	public boolean isOpen() {
+		return ! graphdb.isClosed();
+	}
 }

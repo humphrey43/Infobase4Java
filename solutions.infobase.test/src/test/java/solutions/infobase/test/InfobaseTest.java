@@ -3,15 +3,15 @@ package solutions.infobase.test;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import solutions.infobase.orientdb.InfobaseDatabaseOrientDB;
+import solutions.infobase.orientdb.InfoDatabaseOrientDB;
 
 public class InfobaseTest {
 	
-	static InfobaseDatabaseOrientDB database = null;
+	static InfoDatabaseOrientDB database = null;
 	
 	@BeforeClass
 	public static void setUpBeforeClassMain() throws Exception {
-		database = (InfobaseDatabaseOrientDB) TestEnvironment.getDatabase();
+		database = (InfoDatabaseOrientDB) TestEnvironment.getDatabase();
 //		database.startTransaction();
 	}
 

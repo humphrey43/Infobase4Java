@@ -3,8 +3,6 @@
  */
 package solutions.infobase.test;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -13,25 +11,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
+import solutions.infobase.core.interfaces.InfoClass;
+import solutions.infobase.core.interfaces.InfoObject;
 
 import com.airbus.junit.TestRunner;
 import com.airbus.junit.TestSequence;
-import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
 /**
  * @author hardy
  *
  */
 @RunWith(TestRunner.class)
-public class Test002 extends InfobaseTest {
+public class Test010 extends InfobaseTest {
 
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-//		System.out.println("setUpBeforeClass1");
 	}
 
 	/**
@@ -39,7 +36,6 @@ public class Test002 extends InfobaseTest {
 	 */
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-//		System.out.println("tearDownAfterClass1");
 	}
 
 	/**
@@ -47,7 +43,6 @@ public class Test002 extends InfobaseTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-//		System.out.println("setUp1");
 	}
 
 	/**
@@ -55,19 +50,21 @@ public class Test002 extends InfobaseTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-//		System.out.println("tearDown1");
 	}
 
 	@Test
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
-		System.out.println("test001");
-		database.assertDocumentType("test.TestClass1");
-//		database.assertRelationshipType("test.TestEdge1");
-		
-		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass1");
+		System.out.println("test010");
+		InfoClass class1;
+		InfoObject test1;
+		class1 = database.getInfoClass("Test1Class");
+		test1 = class1.newObject();
+		test1.save();
+//		
+//		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("meta.ObjectClass");
 //		OClass tc3 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass3");
-		assertEquals("test.TestClass1", tc2.getName());
+//		assertEquals("meta.ObjectClass", tc2.getName());
 //		assertEquals("test.TestClass3", tc3.getName());
 //		assertEquals("de.pch.frames.test.TestClass1", tc3.getClass().getSuperclass().getCanonicalName());
 //		assertEquals("test.TestClass1", tc2.getSuperClass().getName());

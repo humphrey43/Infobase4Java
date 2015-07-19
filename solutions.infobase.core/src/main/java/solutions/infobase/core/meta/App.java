@@ -1,4 +1,4 @@
-package Solutions.Infobase.solutions.infobase.meta;
+package solutions.infobase.core.meta;
 
 /**
  * Hello world!
