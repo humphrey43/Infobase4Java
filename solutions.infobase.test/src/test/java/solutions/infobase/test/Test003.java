@@ -62,7 +62,7 @@ public class Test003 extends InfobaseTest {
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
 		System.out.println("test003");
-		database.initBasicMetadata();
+//		database.initBasicMetadata();
 //		database.assertDocumentType("meta.ObjectClass");
 //		database.assertDocumentType("meta.Attribute");
 //		database.assertRelationshipType("meta.has");

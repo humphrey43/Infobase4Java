@@ -1,7 +1,8 @@
 package solutions.infobase.core.interfaces;
 
+import org.apache.commons.configuration.Configuration;
+
 public interface InfoObjectFactory {
-	InfoObject newObject(String infoClassName);
-	InfoObject newObject(InfoClass infoClass);
-	InfoObject newObject(Object rawObject);
+	void setConfiguration(Configuration config, String databaseName);
+	InfoObject newInfoObject(InfoDatabase database, Object rawObject);
 }

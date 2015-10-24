@@ -2,7 +2,7 @@ package solutions.infobase.core.interfaces;
 
 import org.apache.commons.configuration.Configuration;
 
-public interface InfoDatabaseFactory extends InfoObjectFactory {
+public interface InfoDatabaseFactory {
 	void setConfiguration(Configuration config, String databaseName);
 	InfoDatabase newDatabase();
 }

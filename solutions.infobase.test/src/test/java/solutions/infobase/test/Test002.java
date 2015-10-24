@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
+import solutions.infobase.core.interfaces.InfoClass;
 
 import com.airbus.junit.TestRunner;
 import com.airbus.junit.TestSequence;
@@ -60,14 +61,26 @@ public class Test002 extends InfobaseTest {
 
 	@Test
 	@TestSequence(01)
-	public void test() throws InfobaseDatabaseException {
-		System.out.println("test001");
-		database.assertDocumentType("test.TestClass1");
+	public void test() {
+		System.out.println("test002");
+		InfoClass c = null;
+		try {
+			c = database.getInfoClass(CLASS_NAME1);
+		} catch (InfobaseDatabaseException e) {
+		}
+		try {
+			if (c == null) {
+				c = database.createInfoClass(CLASS_NAME1, database.getInfoClass("InfoObject"));
+			}
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		database.assertRelationshipType("test.TestEdge1");
 		
-		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass1");
+//		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass1");
 //		OClass tc3 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass3");
-		assertEquals("test.TestClass1", tc2.getName());
+		assertEquals(CLASS_NAME1, c.getName());
 //		assertEquals("test.TestClass3", tc3.getName());
 //		assertEquals("de.pch.frames.test.TestClass1", tc3.getClass().getSuperclass().getCanonicalName());
 //		assertEquals("test.TestClass1", tc2.getSuperClass().getName());

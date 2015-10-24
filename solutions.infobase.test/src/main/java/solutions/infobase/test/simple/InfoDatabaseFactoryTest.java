@@ -19,24 +19,6 @@ public class InfoDatabaseFactoryTest implements InfoDatabaseFactory {
 	}
 
 	@Override
-	public InfoObject newObject(String infoClassName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public InfoObject newObject(InfoClass infoClass) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public InfoObject newObject(Object rawObject) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void setConfiguration(Configuration config, String databaseName) {
 		// TODO Auto-generated method stub
 		

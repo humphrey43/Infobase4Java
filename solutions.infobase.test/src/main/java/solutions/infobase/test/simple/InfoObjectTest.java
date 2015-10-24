@@ -1,6 +1,6 @@
 package solutions.infobase.test.simple;
 
-import solutions.infobase.core.InfoObjectBasic;
+import solutions.infobase.core.meta.InfoObjectBasic;
 import solutions.infobase.flexdata.FlexData;
 import solutions.infobase.flexdata.IFlexData;
 
@@ -18,6 +18,11 @@ public class InfoObjectTest extends InfoObjectBasic {
 	@Override
 	public Object getValue(String name) {
 		return values.getValue(name);
+	}
+	@Override
+	public void save() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
