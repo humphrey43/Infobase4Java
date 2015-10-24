@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.interfaces.InfoClass;
 import solutions.infobase.core.interfaces.InfoObject;
+import solutions.infobase.core.interfaces.InfoObjectFactory;
 
 import com.airbus.junit.TestRunner;
 import com.airbus.junit.TestSequence;
@@ -58,8 +59,10 @@ public class Test010 extends InfobaseTest {
 		System.out.println("test010");
 		InfoClass class1;
 		InfoObject test1;
-		class1 = database.getInfoClass("Test1Class");
-		test1 = class1.newObject();
+		class1 = database.getInfoClass(CLASS_NAME1);
+		test1 = database.newInfoObject(class1);
+		test1.setValue("Name",  "Hugo");
+		test1.setValue("Alter",  17);
 		test1.save();
 //		
 //		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("meta.ObjectClass");

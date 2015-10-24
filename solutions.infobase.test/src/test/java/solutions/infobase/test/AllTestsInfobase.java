@@ -6,8 +6,9 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	Test000.class,
 	Test002.class,
-	Test003.class
+	Test010.class
 })
 public class AllTestsInfobase {
 public AllTestsInfobase() {

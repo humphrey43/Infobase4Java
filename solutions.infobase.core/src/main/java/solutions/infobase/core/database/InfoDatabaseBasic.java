@@ -3,6 +3,7 @@ package solutions.infobase.core.database;
 import java.util.HashMap;
 import java.util.Map;
 
+import solutions.infobase.core.Infobase;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
 import solutions.infobase.core.interfaces.InfoClass;
@@ -10,12 +11,11 @@ import solutions.infobase.core.interfaces.InfoDatabase;
 import solutions.infobase.core.interfaces.InfoObject;
 import solutions.infobase.core.interfaces.InfoObjectFactory;
 
-public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFactory {
+public abstract class InfoDatabaseBasic implements InfoDatabase {
 	
 	protected long useCounter = 0;
     protected Exception lastException = null;
     protected boolean inError;
-    
 	
 //	public static InfoDatabase assertConnected(String databaseName) throws InfobaseDatabaseException {
 //		InfoDatabaseFactory factory = getFactory(databaseName);
@@ -71,8 +71,8 @@ public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFacto
 //		}
 //		return factory;
 //	}
-	
-	protected String databaseName;
+
+    protected String databaseName;
 	@Override
 	public String getDatabaseName() {
 		return databaseName;
@@ -83,39 +83,21 @@ public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFacto
 		this.databaseName = databaseName;
 	}
 
-	protected InfoObjectFactory infoObjectFactory;
-	protected Map<String, InfoClass> documentClasses;
-	public InfoDatabaseBasic(InfoObjectFactory infoObjectFactory) {
-		this.infoObjectFactory = infoObjectFactory;
-		documentClasses = new HashMap<>();
-	}
-
-	@Override
-	public InfoObject newObject(String infoClassName) {
-		return infoObjectFactory.newObject(infoClassName);
-	}
-	
-	@Override
-	public InfoObject newObject(InfoClass infoClass) {
-		return infoObjectFactory.newObject(infoClass);
-	}
-	
-	@Override
-	public InfoObject newObject(Object rawObject) {
-		return infoObjectFactory.newObject(rawObject);
-	}
-
-	@Override
-	public InfoClass createInfoClass(String classname, InfoClass superclass) {
-		InfoClass erg = null; // infoObjectFactory.newInfoClass("meta.");
-		return erg;
+//	protected InfoObjectFactory infoObjectFactory;
+	protected Map<String, InfoClass> infoClasses;
+	public InfoDatabaseBasic() {
+//		this.infoObjectFactory = infoObjectFactory;
+		infoClasses = new HashMap<>();
+	    setOk();
+	    useCounter = 0L;
 	}
 
 	@Override
 	public InfoClass getInfoClass(String classname) throws InfobaseDatabaseException {
-		InfoClass erg = documentClasses.get(classname);
+		InfoClass erg = infoClasses.get(classname);
 		if (erg == null) {
 			erg = readInfoClass(classname);
+			infoClasses.put(classname, erg);
 		}
 		if (erg == null) {
 			throw new InfobaseDatabaseException("Class " + classname + " not found");
@@ -124,7 +106,7 @@ public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFacto
 	}
 	
 	public InfoClass getInfoClass2(String classname) throws InfobaseDatabaseException {
-		InfoClass erg = documentClasses.get(classname);
+		InfoClass erg = infoClasses.get(classname);
 		if (erg == null) {
 			erg = readInfoClass(classname);
 		}
@@ -166,23 +148,8 @@ public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFacto
         releaseConnection(1L);
     }
 
-    public abstract boolean isClosed();
-	
-//    protected abstract void assertConnectionOpened() throws InfobaseDatabaseException;
-//    
-//	public abstract void assertConnectionClosed() throws InfobaseDatabaseException;
-//	
+    protected abstract void assertConnectionOpened() throws InfobaseDatabaseException;
 
-    protected void assertConnectionOpened() throws InfobaseDatabaseException {
-//        if (! isOpen()) {
-//            createConnection();
-//        }
-//        if (graphdb != null && isClosed()) {
-//            openConnection();
-//            setOk();
-//        }
-    }
-    
 	public void assertConnectionClosed() throws InfobaseDatabaseException {
         if (isOpen()) {
         	if (inError) {
@@ -196,24 +163,6 @@ public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFacto
 	
 	protected abstract void finish() throws InfobaseDatabaseRuntimeException;
 	
-//	public void closeConnection() {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	public void openConnection() {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@SuppressWarnings("deprecation")
-//	protected void createConnection() throws InfobaseDatabaseException {
-//		if (graphdb == null) {
-//			graphdb = ODatabaseDocumentPool.global().acquire(dburl, userid, password);
-//		}
-//	}
-
-
 	public boolean isInError() {
         return inError;
     }
@@ -234,5 +183,13 @@ public abstract class InfoDatabaseBasic implements InfoDatabase, InfoObjectFacto
     public void setError() {
         inError = true;
     }
+    
+	public String getConfigValue(String name) {
+		return Infobase.getConfigValue(databaseName, name, "");
+	}
 
+	public String getConfigValue(String name, String defaultValue) {
+		return Infobase.getConfigValue(databaseName, name, defaultValue);
+	}
+	
 }
