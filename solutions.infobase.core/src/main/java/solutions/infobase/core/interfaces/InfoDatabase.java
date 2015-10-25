@@ -1,6 +1,7 @@
 package solutions.infobase.core.interfaces;
 
 import java.util.List;
+import java.util.Map;
 
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
@@ -17,7 +18,6 @@ public interface InfoDatabase {
 	 *	database information
 	 */
 	public String getDatabaseName();
-	public void setDatabaseName(String databaseName);
 	public Object getRawDatabase();
 	
 	/**
@@ -100,4 +100,7 @@ public interface InfoDatabase {
 	public void setValue(Object rawObject, String name, Object value);
 	public List<InfoObject> queryObjects(String query) throws InfobaseDatabaseException;
 	public InfoObject queryObject(String query) throws InfobaseDatabaseException;
+	public List<InfoAttribute> readAttributes(String classname) throws InfobaseDatabaseException;
+	public void assertMetadata() throws InfobaseDatabaseException;
+	public void clearMetadata() throws InfobaseDatabaseException;
 }

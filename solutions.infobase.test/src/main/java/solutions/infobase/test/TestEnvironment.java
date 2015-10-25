@@ -27,8 +27,7 @@ public class TestEnvironment {
 		return database;
 	}
 	
-	public static void clearDatabase() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigurationException {
-		getDatabase();
+	public static void clearDatabase() {
 	}
 	
 	public static void clearDatabaseFile() {
@@ -56,5 +55,14 @@ public class TestEnvironment {
 			}
 		}
 		database = null;
+	}
+
+	public static InfoDatabase getEmptyDatabase() {
+		try {
+			database = Infobase.getEmptyDatabase("test");
+		} catch (InfobaseDatabaseException e) {
+			e.printStackTrace();
+		}
+		return database;
 	}
 }

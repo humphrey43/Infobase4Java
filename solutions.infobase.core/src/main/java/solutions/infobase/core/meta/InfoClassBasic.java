@@ -1,11 +1,15 @@
 package solutions.infobase.core.meta;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import solutions.infobase.core.Infobase;
 import solutions.infobase.core.Infobase.AttributeType;
+import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.interfaces.InfoAttribute;
 import solutions.infobase.core.interfaces.InfoClass;
 import solutions.infobase.core.interfaces.InfoDatabase;
-import solutions.infobase.core.interfaces.InfoObject;
 
 public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 	
@@ -13,6 +17,7 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 	InfoClass superclass = null;
 	String superclassname = "";
 	Object rawclasstype = null;
+	Map<String, InfoAttribute> attributes;
 	
 	public InfoClassBasic(InfoDatabase database, Object rawObject, String classname, InfoClass superclass) {
 		super(database, rawObject);
@@ -21,6 +26,7 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 		setInfoClass(this);
 		this.superclass = superclass;
 		superclassname = superclass.getName();
+		readAttributes();
 	}
 	
 	public InfoClassBasic(InfoDatabase database, Object rawObject, String classname) {
@@ -28,8 +34,21 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 		name = classname;
 		setValue(Infobase.CLASS_NAME, classname);
 		setInfoClass(this);
+		readAttributes();
 	}
 	
+	protected void readAttributes() {
+		attributes = new LinkedHashMap<>();
+		try {
+			List<InfoAttribute> la = database.readAttributes(name);
+			for (InfoAttribute a : la) {
+				attributes.put(a.getName(), a);
+			}
+		} catch (InfobaseDatabaseException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public InfoClass getSuperclass() {
 		return superclass;
 	}
@@ -46,8 +65,7 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 
 	@Override
 	public InfoAttribute getAttribute(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return attributes.get(name);
 	}
 
 	@Override

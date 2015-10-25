@@ -2,6 +2,8 @@ package solutions.infobase.core.meta;
 
 import solutions.infobase.core.interfaces.InfoDatabase;
 import solutions.infobase.core.interfaces.InfoObject;
+import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
+import solutions.infobase.core.interfaces.InfoAttribute;
 import solutions.infobase.core.interfaces.InfoClass;
 
 /**
@@ -74,7 +76,12 @@ public class InfoObjectBasic implements InfoObject {
 
 	@Override
 	public Object getValue(String name) {
-		return database.getValue(rawObject, name);
+		InfoAttribute attr = infoClass.getAttribute(name);
+		if (attr != null) {
+			return database.getValue(rawObject, name);
+		} else {
+			throw new InfobaseDatabaseRuntimeException("Unknown attribute: " + name);
+		}
 	}
 
 	@Override

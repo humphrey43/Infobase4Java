@@ -113,8 +113,14 @@ public class Infobase {
 	public static InfoDatabase getDatabase(String databaseName) throws InfobaseDatabaseException {
 		InfoDatabaseFactory factory = getDatabaseFactory(databaseName);
 		InfoObjectFactory of =  getObjectFactory(databaseName);
-		InfoDatabase database = factory.newDatabase();
-		database.setDatabaseName(databaseName);
+		InfoDatabase database = factory.newDatabase(databaseName);
+		return database;
+	}
+
+	public static InfoDatabase getEmptyDatabase(String databaseName) throws InfobaseDatabaseException {
+		InfoDatabaseFactory factory = getDatabaseFactory(databaseName);
+		InfoObjectFactory of =  getObjectFactory(databaseName);
+		InfoDatabase database = factory.newEmptyDatabase(databaseName);
 		return database;
 	}
 

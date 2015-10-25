@@ -22,7 +22,7 @@ import solutions.infobase.orientdb.InfoDatabaseOrientDB;
  *
  */
 @RunWith(TestRunner.class)
-public class Test000 extends InfobaseTest {
+public class Test000 extends InfobaseTest0 {
 
 	/**
 	 * @throws java.lang.Exception
@@ -59,12 +59,12 @@ public class Test000 extends InfobaseTest {
 	@Test
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
-		System.out.println("test000");
-		System.out.println(AttributeType.LANGUAGE_STRING.toString());
-		((InfoDatabaseOrientDB) database).initBasicMetadata();
-		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME1);
-		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME2);
-		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME3);
+		System.out.println("test000: Löschen der Datenbank");
+//		System.out.println(AttributeType.LANGUAGE_STRING.toString());
+//		((InfoDatabaseOrientDB) database).clearMetadata();
+//		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME1);
+//		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME2);
+//		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME3);
 	}
 
 }

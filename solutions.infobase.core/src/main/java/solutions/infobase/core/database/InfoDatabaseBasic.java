@@ -78,15 +78,11 @@ public abstract class InfoDatabaseBasic implements InfoDatabase {
 		return databaseName;
 	}
 
-	@Override
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
-	}
-
 //	protected InfoObjectFactory infoObjectFactory;
 	protected Map<String, InfoClass> infoClasses;
-	public InfoDatabaseBasic() {
+	public InfoDatabaseBasic(String databaseName) {
 //		this.infoObjectFactory = infoObjectFactory;
+		this.databaseName = databaseName;
 		infoClasses = new HashMap<>();
 	    setOk();
 	    useCounter = 0L;
@@ -97,7 +93,11 @@ public abstract class InfoDatabaseBasic implements InfoDatabase {
 		InfoClass erg = infoClasses.get(classname);
 		if (erg == null) {
 			erg = readInfoClass(classname);
-			infoClasses.put(classname, erg);
+			if (erg != null) {
+				infoClasses.put(classname, erg);
+				String superclassname = erg.getSuperClassName();
+				if (!superclassname.equals("")) getInfoClass(superclassname);
+			}
 		}
 		if (erg == null) {
 			throw new InfobaseDatabaseException("Class " + classname + " not found");
