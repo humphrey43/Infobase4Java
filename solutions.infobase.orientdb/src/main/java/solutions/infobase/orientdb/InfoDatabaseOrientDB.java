@@ -32,8 +32,8 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 	OrientGraph graphdb = null;
 	OrientGraphNoTx graphdbNoTx = null;
 	
-	public InfoDatabaseOrientDB() {
-		super();
+	public InfoDatabaseOrientDB(String databaseName) {
+		super(databaseName);
 	}
 	
 	public Object getRawDatabase() {
@@ -313,10 +313,55 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 //		return erg;
 //	}
 
-	public void initBasicMetadata() {
+	@Override
+	public void clearMetadata() throws InfobaseDatabaseException {
+		dropEdgeTypes("", "E");
+		dropVertexTypes("", "V");
+	}
+	
+	protected void dropEdgeTypes(String indent, String name) {
 		try {
-			clearMetadata();
-			
+			Iterable<OrientVertex> list = getGraphdbNoTx().command(new OCommandSQL("select name from (select expand(classes) from metadata:schema) where superClass = '" + name + "'")).execute();
+			if (list != null) {
+				for (OrientVertex v : list ) {
+					dropEdgeTypes(indent + "  ", v.getProperty("name"));
+				}
+			}
+			System.out.println(indent + name);
+			if (!name.equals("E")) getGraphdbNoTx().dropEdgeType(name);
+		} catch(Exception e) {
+			e.printStackTrace();			
+		}
+	}
+
+	protected void dropVertexTypes(String indent, String name) {
+		try {
+			Iterable<OrientVertex> list = getGraphdbNoTx().command(new OCommandSQL("select name from (select expand(classes) from metadata:schema) where superClass = '" + name + "'")).execute();
+			if (list != null) {
+				for (OrientVertex v : list ) {
+					dropVertexTypes(indent + "  ", v.getProperty("name"));
+				}
+			}
+			System.out.println(indent + name);
+			if (!name.equals("V")) getGraphdbNoTx().dropVertexType(name);
+		} catch(Exception e) {
+			e.printStackTrace();			
+		}
+	}
+
+	@Override
+	public void assertMetadata() throws InfobaseDatabaseException {
+		OrientVertexType vt = getGraphdbNoTx().getVertexType("InfoObject");
+		if (vt == null) {
+			initBasicMetadata();
+		}
+		InfoClass io = getInfoClass("InfoObject");
+		InfoClass ic = getInfoClass("InfoClass");
+		InfoClass ia = getInfoClass("InfoAttribute");
+	}
+	
+	protected void initBasicMetadata() {
+		try {
 			OClass infoobject = assertObjectType("InfoObject");
 //			assertProperty(infoobject, Infobase.INFO_CLASS_NAME, OType.STRING);
 //			assertProperty(infoobject, Infobase.SUPER_CLASS_NAME, OType.STRING);
@@ -432,15 +477,6 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 	}
 
 
-	protected void clearMetadata() throws InfobaseDatabaseException {
-		dropVertexType("TestClass1");
-		dropVertexType("InfoClass");
-		dropVertexType("InfoAttribute");
-		dropVertexType("InfoObject");
-		dropEdgeType("hasAttribute");
-		dropEdgeType("hasRelation");
-	}
-
 	public void dropEdgeType(String name) {
 		try {
 			getGraphdbNoTx().dropEdgeType(name);
@@ -545,6 +581,7 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 	@Override
 	public InfoClass createInfoClass(String infoClassName, InfoClass superclass) throws InfobaseDatabaseException {
 		assertObjectType(infoClassName, superclass.getName());
+		newInfoClass(infoClassName, superclass);
 		return getInfoClass(infoClassName);
 	}
 
@@ -562,5 +599,34 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 	@Override
 	public void setValue(Object rawObject, String name, Object value) {
 		((OrientVertex) rawObject).setProperty(name, value);
+	}
+
+	@Override
+	public List<InfoAttribute> readAttributes(String classname) throws InfobaseDatabaseException {
+		List<InfoAttribute> erg = new LinkedList<>();
+		InfobaseDatabaseException exception = null;
+		try {
+			long dbcount = useConnection();
+			Iterable<OrientVertex> list = getGraphdb().command(new OCommandSQL("select expand(out('hasAttribute')) from InfoClass where name = '" + classname + "'")).execute();
+			if (list != null) {
+				for (OrientVertex v : list ) {
+					try {
+						InfoAttribute a = new InfoAttributeBasic(this, v);
+						erg.add(a);
+					} catch (SecurityException | IllegalArgumentException e) {
+						exception = new InfobaseDatabaseException(e);
+						break;
+					}
+				}
+			}
+			releaseConnection(dbcount);
+		} catch (InfobaseDatabaseException e) {
+			exception = e;
+		}
+		if (exception != null) {
+			exception.printStackTrace();
+			throw exception;
+		}
+		return erg;
 	}
 }

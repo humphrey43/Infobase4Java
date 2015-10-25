@@ -6,10 +6,9 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
-import solutions.infobase.core.interfaces.InfoClass;
+import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.interfaces.InfoDatabase;
 import solutions.infobase.core.interfaces.InfoDatabaseFactory;
-import solutions.infobase.core.interfaces.InfoObject;
 
 public class InfoDatabaseFactoryOrientDB implements InfoDatabaseFactory {
 
@@ -23,8 +22,17 @@ public class InfoDatabaseFactoryOrientDB implements InfoDatabaseFactory {
 	public InfoDatabaseFactoryOrientDB() {
 	}
 	
-	public InfoDatabase newDatabase() {
-		return new InfoDatabaseOrientDB();
+	public InfoDatabase newDatabase(String databaseName) throws InfobaseDatabaseException {
+		InfoDatabase db = new InfoDatabaseOrientDB(databaseName);
+		db.assertMetadata();
+		return db;
+	}
+
+	public InfoDatabase newEmptyDatabase(String databaseName) throws InfobaseDatabaseException {
+		InfoDatabase db = new InfoDatabaseOrientDB(databaseName);
+		db.clearMetadata();
+		db.assertMetadata();
+		return db;
 	}
 
 	public OrientGraph newConnection() {
