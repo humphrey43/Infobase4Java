@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import solutions.infobase.core.Infobase;
-import solutions.infobase.core.Infobase.AttributeType;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.interfaces.InfoAttribute;
 import solutions.infobase.core.interfaces.InfoClass;
@@ -21,9 +20,11 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 	
 	public InfoClassBasic(InfoDatabase database, Object rawObject, String classname, InfoClass superclass) {
 		super(database, rawObject);
+		attributes = new LinkedHashMap<>();
 		this.name = classname;
-		setValue(Infobase.CLASS_NAME, classname);
-		setInfoClass(this);
+		setInfoClassName("InfoClass");
+		String n = (String) getValueDirect(Infobase.CLASS_NAME);
+		if (n == null || n.equals("")) setValueDirect(Infobase.CLASS_NAME, classname);
 		this.superclass = superclass;
 		superclassname = superclass.getName();
 		readAttributes();
@@ -31,16 +32,17 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 	
 	public InfoClassBasic(InfoDatabase database, Object rawObject, String classname) {
 		super(database, rawObject);
+		attributes = new LinkedHashMap<>();
 		name = classname;
-		setValue(Infobase.CLASS_NAME, classname);
-		setInfoClass(this);
+		setInfoClassName("InfoClass");
 		readAttributes();
+//		setValueDirect(Infobase.CLASS_NAME, classname);
 	}
 	
 	protected void readAttributes() {
-		attributes = new LinkedHashMap<>();
+//		attributes = new LinkedHashMap<>();
 		try {
-			List<InfoAttribute> la = database.readAttributes(name);
+			List<InfoAttribute> la = database.readAttributes(this);
 			for (InfoAttribute a : la) {
 				attributes.put(a.getName(), a);
 			}
@@ -69,9 +71,8 @@ public class InfoClassBasic extends InfoObjectBasic implements InfoClass {
 	}
 
 	@Override
-	public InfoAttribute newAttribute(String name, AttributeType type) {
-		// TODO Auto-generated method stub
-		return null;
+	public void setAttribute(InfoAttribute attribute) {
+		attributes.put(attribute.getName(), attribute);
 	}
 
 	@Override

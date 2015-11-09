@@ -10,19 +10,22 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 import com.tinkerpop.blueprints.impls.orient.OrientVertexType;
 
 import solutions.infobase.core.Infobase;
 import solutions.infobase.core.Infobase.AttributeType;
+import solutions.infobase.core.Infobase.CardinalityType;
+import solutions.infobase.core.Infobase.OptionalityType;
 import solutions.infobase.core.database.InfoDatabaseBasic;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
+import solutions.infobase.core.exceptions.InfobaseException;
 import solutions.infobase.core.interfaces.InfoAttribute;
 import solutions.infobase.core.interfaces.InfoClass;
 import solutions.infobase.core.interfaces.InfoObject;
+import solutions.infobase.core.interfaces.InfoRelationship;
 import solutions.infobase.core.meta.InfoAttributeBasic;
 import solutions.infobase.core.meta.InfoClassBasic;
 import solutions.infobase.core.meta.InfoObjectBasic;
@@ -31,9 +34,20 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 
 	OrientGraph graphdb = null;
 	OrientGraphNoTx graphdbNoTx = null;
-	
+
+	private boolean inAdminMode = false;
+
+	protected boolean isInAdminMode() {
+		return inAdminMode;
+	}
+
 	public InfoDatabaseOrientDB(String databaseName) {
 		super(databaseName);
+	}
+	
+	public InfoDatabaseOrientDB(String databaseName, boolean inAdminMode) {
+		super(databaseName);
+		this.inAdminMode = inAdminMode;
 	}
 	
 	public Object getRawDatabase() {
@@ -79,6 +93,18 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 		v.setProperty(Infobase.OBJECT_INFO_CLASS_NAME, infoClass.getName());
 		InfoObjectBasic erg = new InfoObjectBasic(this, v);
 		erg.setInfoClass(infoClass);
+		return erg;
+	}
+	
+	@Override
+	public InfoObject newInfoObject(String infoClassName) throws InfobaseException {
+		InfoObject erg = null;
+		InfoClass infoClass = getInfoClass(infoClassName);
+		if (infoClass != null) {
+			erg = newInfoObject(infoClass);
+		} else {
+			throw new InfobaseException("Class unknown: " + infoClassName);
+		}
 		return erg;
 	}
 	
@@ -220,7 +246,7 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 				InfoObjectBasic fo;
 				InfoClass infoclass;
 				try {
-					infoclass = getInfoClass(v.getProperty(Infobase.OBJECT_INFO_CLASS_NAME));
+					infoclass = getInfoClass((String) v.getProperty(Infobase.OBJECT_INFO_CLASS_NAME));
 					fo = new InfoObjectBasic(this, v);
 					fo.setInfoClass(infoclass);
 					erg.add(fo);
@@ -315,6 +341,9 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 
 	@Override
 	public void clearMetadata() throws InfobaseDatabaseException {
+		if (!inAdminMode) {
+			throw new InfobaseDatabaseException("method only allowed in admin mode: clearMetadata");
+		}
 		dropEdgeTypes("", "E");
 		dropVertexTypes("", "V");
 	}
@@ -324,7 +353,7 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 			Iterable<OrientVertex> list = getGraphdbNoTx().command(new OCommandSQL("select name from (select expand(classes) from metadata:schema) where superClass = '" + name + "'")).execute();
 			if (list != null) {
 				for (OrientVertex v : list ) {
-					dropEdgeTypes(indent + "  ", v.getProperty("name"));
+					dropEdgeTypes(indent + "  ", (String) v.getProperty("name"));
 				}
 			}
 			System.out.println(indent + name);
@@ -339,7 +368,7 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 			Iterable<OrientVertex> list = getGraphdbNoTx().command(new OCommandSQL("select name from (select expand(classes) from metadata:schema) where superClass = '" + name + "'")).execute();
 			if (list != null) {
 				for (OrientVertex v : list ) {
-					dropVertexTypes(indent + "  ", v.getProperty("name"));
+					dropVertexTypes(indent + "  ", (String) v.getProperty("name"));
 				}
 			}
 			System.out.println(indent + name);
@@ -351,48 +380,64 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 
 	@Override
 	public void assertMetadata() throws InfobaseDatabaseException {
-		OrientVertexType vt = getGraphdbNoTx().getVertexType("InfoObject");
-		if (vt == null) {
-			initBasicMetadata();
-		}
-		InfoClass io = getInfoClass("InfoObject");
-		InfoClass ic = getInfoClass("InfoClass");
-		InfoClass ia = getInfoClass("InfoAttribute");
+		InfoClass io = getInfoClass(Infobase.CLASS_INFO_OBJECT);
+		InfoClass ic = getInfoClass(Infobase.CLASS_INFO_CLASS);
+		InfoClass ia = getInfoClass(Infobase.CLASS_INFO_ATTRIBUTE);
+		InfoClass ir = getInfoClass(Infobase.CLASS_INFO_RELATIONSHIP);
 	}
 	
-	protected void initBasicMetadata() {
+	@Override
+	public void createMetadata() throws InfobaseDatabaseException {
+		if (!inAdminMode) {
+			throw new InfobaseDatabaseException("method only allowed in admin mode: createMetaData");
+		}
 		try {
-			OClass infoobject = assertObjectType("InfoObject");
-//			assertProperty(infoobject, Infobase.INFO_CLASS_NAME, OType.STRING);
+			OClass infoobject = assertObjectType(Infobase.CLASS_INFO_OBJECT);
+//			assertProperty(infoobject, Infobase.INFO_CLAE, OType.STRING);
 //			assertProperty(infoobject, Infobase.SUPER_CLASS_NAME, OType.STRING);
 			
-			OClass infoclass = assertObjectType("InfoClass", "InfoObject");
+			OClass infoclass = assertObjectType(Infobase.CLASS_INFO_CLASS, Infobase.CLASS_INFO_OBJECT);
 			
-			OClass infoattribute = assertObjectType("InfoAttribute", "InfoObject");
+			OClass infoattribute = assertObjectType(Infobase.CLASS_INFO_ATTRIBUTE, Infobase.CLASS_INFO_OBJECT);
 //			assertProperty(infoattribute, Infobase.ATTRIBUTE_NAME, OType.STRING);
 //			assertProperty(infoattribute, Infobase.ATTRIBUTE_TYPE, OType.STRING);
 			
-			assertRelation((OrientVertexType) infoclass, "InfoAttribute", Direction.OUT, OType.LINKMAP );
+			OClass inforelationship = assertObjectType(Infobase.CLASS_INFO_RELATIONSHIP, Infobase.CLASS_INFO_OBJECT);
+
+			assertRelation((OrientVertexType) infoclass, Infobase.CLASS_INFO_ATTRIBUTE, Direction.OUT, OType.LINKMAP );
 			
 			assertRelationshipType("hasRelation");
 			assertRelationshipType("hasAttribute", "hasRelation");
 			
-			InfoClass io = newInfoClass("InfoObject");
-			InfoClass ic = newInfoClass("InfoClass", io);
-			InfoClass ia = newInfoClass("InfoAttribute", io);
+			InfoClass io = newInfoClass(Infobase.CLASS_INFO_OBJECT);
+			InfoClass ic = newInfoClass(Infobase.CLASS_INFO_CLASS, io);
+			InfoClass ia = newInfoClass(Infobase.CLASS_INFO_ATTRIBUTE, io);
+			InfoClass ir = newInfoClass(Infobase.CLASS_INFO_RELATIONSHIP, io);
 
 			startTransaction();
-			io = getInfoClass("InfoObject");
-			ia = getInfoClass("InfoAttribute");
-			ic = getInfoClass("InfoClass");
+			io = getInfoClass(Infobase.CLASS_INFO_OBJECT);
+			ia = getInfoClass(Infobase.CLASS_INFO_ATTRIBUTE);
+			ic = getInfoClass(Infobase.CLASS_INFO_CLASS);
+			ir = getInfoClass(Infobase.CLASS_INFO_RELATIONSHIP);
 			
-			createAttribute(io, Infobase.OBJECT_INFO_CLASS_NAME, AttributeType.STRING);
-			createAttribute(io, Infobase.OBJECT_SUPER_CLASS_NAME, AttributeType.STRING);
+			createInfoAttribute(io, Infobase.OBJECT_INFO_CLASS_NAME, AttributeType.STRING);
+	
+			createInfoAttribute(ic, Infobase.CLASS_SUPER_CLASS_NAME, AttributeType.STRING);
+			createInfoAttribute(ic, Infobase.CLASS_NAME, AttributeType.STRING);
 			
-			createAttribute(ic, Infobase.CLASS_NAME, AttributeType.STRING);
+			createInfoAttribute(ia, Infobase.ATTRIBUTE_NAME, AttributeType.STRING);
+			createInfoAttribute(ia, Infobase.ATTRIBUTE_TYPE, AttributeType.STRING);
 			
-			createAttribute(ia, Infobase.ATTRIBUTE_NAME, AttributeType.STRING);
-			createAttribute(ia, Infobase.ATTRIBUTE_TYPE, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_NAME, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_CARDINALITY_FROM, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_CARDINALITY_TO, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_DESCRIPTION, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_DESIGNATION_FROM, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_DESIGNATION_TO, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_DIRECTIONAL, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_OPTIONALITY_FROM, AttributeType.STRING);
+			createInfoAttribute(ir, Infobase.RELATIONSHIP_OPTIONALITY_TO, AttributeType.STRING);
+
 			endTransaction();
 			int i = 42;
 			
@@ -401,27 +446,6 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 			e.printStackTrace();
 		}
 	}
-
-	public InfoAttribute createAttribute(InfoClass infoclass, String name, AttributeType type ) throws InfobaseDatabaseException {
-		
-		InfoClass ia = getInfoClass("InfoAttribute");
-		InfoAttribute attr = newInfoAttribute(ia);
-		
-		assertProperty((OClass) infoclass.getRawClassType(), name, translateType(type));
-		
-		attr.setName(name);
-		attr.setDescribedClass(infoclass);
-		attr.setType(type);
-		attr.save();
-		
-		createRelation(Infobase.RELATION_HAS_ATTRIBUTE, (OrientVertex) infoclass.getRawObject(), (OrientVertex) attr.getRawObject());
-
-		infoclass.save();
-		attr.save();
-
-		return attr;
-	}
-	
 	public OType translateType(AttributeType type) {
 		OType erg = null;
 		switch (type) {
@@ -463,15 +487,15 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 
 	private InfoClass newInfoClass(String infoClassName) {
 		OrientVertex v = getGraphdb().addVertex("class:InfoClass");
-		v.setProperty(Infobase.OBJECT_INFO_CLASS_NAME, infoClassName);
+		v.setProperty(Infobase.CLASS_NAME, infoClassName);
 		InfoClass erg = new InfoClassBasic(this, v, infoClassName);
 		return erg;
 	}
 
 	private InfoClass newInfoClass(String infoClassName, InfoClass superclass) {
 		OrientVertex v = getGraphdb().addVertex("class:InfoClass");
-		v.setProperty(Infobase.OBJECT_INFO_CLASS_NAME, infoClassName);
-		v.setProperty(Infobase.OBJECT_SUPER_CLASS_NAME, superclass.getName());
+		v.setProperty(Infobase.CLASS_NAME, infoClassName);
+		v.setProperty(Infobase.CLASS_SUPER_CLASS_NAME, superclass.getName());
 		InfoClass erg = new InfoClassBasic(this, v, infoClassName, superclass);
 		return erg;
 	}
@@ -497,7 +521,7 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 		InfobaseDatabaseException exception = null;
 		try {
 			long dbcount = useConnection();
-			Iterable<OrientVertex> list = getGraphdb().command(new OCommandSQL("select from InfoClass where infoclassname = '" + classname + "'")).execute();
+			Iterable<OrientVertex> list = getGraphdb().command(new OCommandSQL("select from InfoClass where name = '" + classname + "'")).execute();
 			if (list != null) {
 				for (OrientVertex v : list ) {
 					try {
@@ -524,6 +548,68 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 		return erg;
 	}
 
+	@Override
+	public InfoClass readInfoClassId(String infoId) throws InfobaseDatabaseException {
+		InfoClass erg = null;
+		InfobaseDatabaseException exception = null;
+		try {
+			long dbcount = useConnection();
+			Iterable<OrientVertex> list = getGraphdb().command(new OCommandSQL("select from InfoClass where @RID = " + infoId + "")).execute();
+			if (list != null) {
+				for (OrientVertex v : list ) {
+					try {
+						String classname = (String) v.getProperty(Infobase.CLASS_NAME);
+						OrientVertexType vt = getGraphdb().getVertexType(classname);
+						if (vt != null) {
+							erg = new InfoClassBasic(this, v, classname);
+							erg.setRawClassType(vt);
+							break;
+						}
+					} catch (SecurityException | IllegalArgumentException e) {
+						exception = new InfobaseDatabaseException(e);
+						break;
+					}
+				}
+			}
+			releaseConnection(dbcount);
+		} catch (InfobaseDatabaseException e) {
+			exception = e;
+		}
+		if (exception != null) {
+			exception.printStackTrace();
+			throw exception;
+		}
+		return erg;
+	}
+
+
+	@Override
+	public InfoAttribute createInfoAttribute(InfoClass infoclass, String name, AttributeType type ) throws InfobaseDatabaseException {
+		
+		InfoAttribute attr = infoclass.getAttribute(name);
+		if (attr == null) {
+			InfoClass ia = getInfoClass("InfoAttribute");
+			attr = newInfoAttribute(ia);
+			
+			assertProperty((OClass) infoclass.getRawClassType(), name, translateType(type));
+			
+			attr.setName(name);
+			attr.setDescribedClass(infoclass);
+			attr.setType(type);
+			attr.save();
+			
+			createRelation(Infobase.RELATION_HAS_ATTRIBUTE, (OrientVertex) infoclass.getRawObject(), (OrientVertex) attr.getRawObject());
+
+			infoclass.setAttribute(attr);
+			infoclass.save();
+			attr.save();
+			
+		}
+
+
+		return attr;
+	}
+	
 	@Override
     public boolean isClosed() {
         boolean erg = true;
@@ -602,16 +688,20 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 	}
 
 	@Override
-	public List<InfoAttribute> readAttributes(String classname) throws InfobaseDatabaseException {
+	public List<InfoAttribute> readAttributes(InfoClass infoclass) throws InfobaseDatabaseException {
 		List<InfoAttribute> erg = new LinkedList<>();
 		InfobaseDatabaseException exception = null;
 		try {
 			long dbcount = useConnection();
-			Iterable<OrientVertex> list = getGraphdb().command(new OCommandSQL("select expand(out('hasAttribute')) from InfoClass where name = '" + classname + "'")).execute();
+			String cmd = "select expand(out('hasAttribute')) from InfoClass where name = '" + infoclass.getName() + "'";
+			Iterable<OrientVertex> list = getGraphdb().command(new OCommandSQL(cmd)).execute();
 			if (list != null) {
 				for (OrientVertex v : list ) {
 					try {
 						InfoAttribute a = new InfoAttributeBasic(this, v);
+						a.setTypeDirect(translateType((String) v.getProperty("type"))); 
+						a.setDescribedClass(infoclass);
+						a.setInfoClassName(Infobase.OBJECT_INFO_CLASS_NAME);
 						erg.add(a);
 					} catch (SecurityException | IllegalArgumentException e) {
 						exception = new InfobaseDatabaseException(e);
@@ -628,5 +718,52 @@ public class InfoDatabaseOrientDB extends InfoDatabaseBasic {
 			throw exception;
 		}
 		return erg;
+	}
+
+	private AttributeType translateType(String name) {
+		return AttributeType.valueOf(name);
+	}
+
+	@Override
+	public String getInfoId(Object rawObject) {
+		return ((OrientVertex) rawObject).getIdentity().toString();
+	}
+
+	@Override
+	public InfoClass getClassFrom(InfoRelationship relationship) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InfoClass getClassFrom(InfoRelationship relationship, InfoClass start) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InfoClass getClassTo(InfoRelationship relationship) {
+//		String infoId = relationship.getProperty// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InfoClass getClassTo(InfoRelationship relationship, InfoClass start) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public InfoRelationship getRelationship(String relationName) throws InfobaseDatabaseException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InfoRelationship createRelationship(String relationName, InfoClass c1, InfoClass c2,
+			CardinalityType cardinalityFrom, OptionalityType optionalityFrom, CardinalityType cardinalityTo,
+			OptionalityType optionalityTo, boolean directional) throws InfobaseDatabaseException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

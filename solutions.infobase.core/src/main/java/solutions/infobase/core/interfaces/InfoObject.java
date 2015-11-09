@@ -1,17 +1,23 @@
 package solutions.infobase.core.interfaces;
 
 public interface InfoObject {
-	public InfoClass getInfoClass();
-	public String getInfoClassName();
-	public Object getRawObject();
-	public void setRawObject(Object rawObject);
+	InfoClass getInfoClass();
+	String getInfoId();
+	String getInfoClassName();
+	void setInfoClassName(String infoClassName);
+	Object getRawObject();
+	void setRawObject(Object rawObject);
 	
-	public InfoDatabase getDatabase();
-	public void setDatabase(InfoDatabase database);
+	InfoDatabase getDatabase();
+	void setDatabase(InfoDatabase database);
 	
-	public void setValue(String name, Object value);
-	public Object getValue(String name);
-	public String getString(String name);
+	void setValue(String name, Object value);
+	void setValueDirect(String name, Object value);
+	void setValue(String name, boolean value);
+	Object getValue(String name);
+	Object getValueDirect(String name);
+	String getString(String name, String defaultValue);
+	String getString(String name);
 	
-	public void save();
+	void save();
 }

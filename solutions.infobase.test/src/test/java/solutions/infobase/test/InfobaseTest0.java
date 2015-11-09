@@ -3,6 +3,7 @@ package solutions.infobase.test;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import solutions.infobase.core.Infobase;
 import solutions.infobase.core.interfaces.InfoDatabase;
 
 public class InfobaseTest0 {
@@ -15,7 +16,7 @@ public class InfobaseTest0 {
 	
 	@BeforeClass
 	public static void setUpBeforeClassMain() throws Exception {
-		database = TestEnvironment.getEmptyDatabase();
+		database = Infobase.getBasicDatabase("test");
 //		database.startTransaction();
 	}
 
@@ -24,6 +25,10 @@ public class InfobaseTest0 {
 	 */
 	@AfterClass
 	public static void tearDownAfterClassMain() throws Exception {
+		if (database != null) {
+			database.close();
+			database = null;
+		}
 //		database.endTransaction();
 //		TestEnvironment.finish();
 //		database = null;

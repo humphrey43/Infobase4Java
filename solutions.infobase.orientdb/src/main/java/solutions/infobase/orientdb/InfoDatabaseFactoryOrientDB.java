@@ -18,20 +18,19 @@ public class InfoDatabaseFactoryOrientDB implements InfoDatabaseFactory {
 	protected String password;
 	protected int minPool;
 	protected int maxPool;
+	boolean isAdmin = false;
 	
 	public InfoDatabaseFactoryOrientDB() {
 	}
 	
 	public InfoDatabase newDatabase(String databaseName) throws InfobaseDatabaseException {
-		InfoDatabase db = new InfoDatabaseOrientDB(databaseName);
+		InfoDatabase db = new InfoDatabaseOrientDB(databaseName, isAdmin);
 		db.assertMetadata();
 		return db;
 	}
 
-	public InfoDatabase newEmptyDatabase(String databaseName) throws InfobaseDatabaseException {
-		InfoDatabase db = new InfoDatabaseOrientDB(databaseName);
-		db.clearMetadata();
-		db.assertMetadata();
+	public InfoDatabase newBasicDatabase(String databaseName) throws InfobaseDatabaseException {
+		InfoDatabase db = new InfoDatabaseOrientDB(databaseName, isAdmin);
 		return db;
 	}
 
@@ -49,6 +48,7 @@ public class InfoDatabaseFactoryOrientDB implements InfoDatabaseFactory {
 		password = config.getString("dbconfig[@name='" + databaseName + "']/password", "");
 		minPool = config.getInt("dbconfig[@name='" + databaseName + "']/minPool", 1);
 		maxPool = config.getInt("dbconfig[@name='" + databaseName + "']/maxPool", 3);
+		isAdmin = config.getBoolean("dbconfig[@name='" + databaseName + "']/admin", false);
 //		OrientGraph graph = new OrientGraph(dburl);
 //		graph.shutdown();
 	    factory = new OrientGraphFactory(dburl, userid, password);

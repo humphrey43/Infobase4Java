@@ -8,8 +8,6 @@ import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
 import solutions.infobase.core.interfaces.InfoClass;
 import solutions.infobase.core.interfaces.InfoDatabase;
-import solutions.infobase.core.interfaces.InfoObject;
-import solutions.infobase.core.interfaces.InfoObjectFactory;
 
 public abstract class InfoDatabaseBasic implements InfoDatabase {
 	
@@ -80,10 +78,12 @@ public abstract class InfoDatabaseBasic implements InfoDatabase {
 
 //	protected InfoObjectFactory infoObjectFactory;
 	protected Map<String, InfoClass> infoClasses;
+	protected Map<String, InfoClass> infoClassesId;
 	public InfoDatabaseBasic(String databaseName) {
 //		this.infoObjectFactory = infoObjectFactory;
 		this.databaseName = databaseName;
 		infoClasses = new HashMap<>();
+		infoClassesId = new HashMap<>();
 	    setOk();
 	    useCounter = 0L;
 	}
@@ -95,12 +95,31 @@ public abstract class InfoDatabaseBasic implements InfoDatabase {
 			erg = readInfoClass(classname);
 			if (erg != null) {
 				infoClasses.put(classname, erg);
+				infoClassesId.put(erg.getInfoId(), erg);
 				String superclassname = erg.getSuperClassName();
 				if (!superclassname.equals("")) getInfoClass(superclassname);
 			}
 		}
 		if (erg == null) {
 			throw new InfobaseDatabaseException("Class " + classname + " not found");
+		}
+		return erg;
+	}
+	
+	@Override
+	public InfoClass getInfoClassId(String infoId) throws InfobaseDatabaseException {
+		InfoClass erg = infoClassesId.get(infoId);
+		if (erg == null) {
+			erg = readInfoClassId(infoId);
+			if (erg != null) {
+				infoClasses.put(erg.getName(), erg);
+				infoClassesId.put(infoId, erg);
+				String superclassname = erg.getSuperClassName();
+				if (!superclassname.equals("")) getInfoClass(superclassname);
+			}
+		}
+		if (erg == null) {
+			throw new InfobaseDatabaseException("Class  with id" + infoId + " not found");
 		}
 		return erg;
 	}
@@ -191,5 +210,4 @@ public abstract class InfoDatabaseBasic implements InfoDatabase {
 	public String getConfigValue(String name, String defaultValue) {
 		return Infobase.getConfigValue(databaseName, name, defaultValue);
 	}
-	
 }

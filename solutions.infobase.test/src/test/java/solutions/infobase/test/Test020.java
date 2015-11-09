@@ -25,7 +25,7 @@ import com.airbus.junit.TestSequence;
  *
  */
 @RunWith(TestRunner.class)
-public class Test010 extends InfobaseTest {
+public class Test020 extends InfobaseTest {
 
 	/**
 	 * @throws java.lang.Exception

@@ -9,5 +9,5 @@ public interface InfoClass extends InfoObject {
 	Object getRawClassType();
 	void setRawClassType(Object rawclasstype);
 	InfoAttribute getAttribute(String name);
-	InfoAttribute newAttribute(String name, AttributeType type);
+	void setAttribute(InfoAttribute attribute);
 }

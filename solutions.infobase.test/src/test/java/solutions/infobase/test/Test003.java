@@ -12,7 +12,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import solutions.infobase.core.Infobase.AttributeType;
+import solutions.infobase.core.Infobase.CardinalityType;
+import solutions.infobase.core.Infobase.OptionalityType;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
+import solutions.infobase.core.interfaces.InfoClass;
+import solutions.infobase.core.interfaces.InfoRelationship;
 
 import com.airbus.junit.TestRunner;
 import com.airbus.junit.TestSequence;
@@ -62,18 +67,37 @@ public class Test003 extends InfobaseTest {
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
 		System.out.println("test003");
-//		database.initBasicMetadata();
-//		database.assertDocumentType("meta.ObjectClass");
-//		database.assertDocumentType("meta.Attribute");
-//		database.assertRelationshipType("meta.has");
+		InfoRelationship r = null;
+		try {
+			database.startTransaction();
+		} catch (InfobaseDatabaseException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			r = database.getRelationship(RELATION_NAME1);
+		} catch (InfobaseDatabaseException e) {
+		}
+		try {
+			if (r == null) {
+				InfoClass c1 = database.getInfoClass(CLASS_NAME1);
+				InfoClass c2 = database.getInfoClass(CLASS_NAME2);
+				r = database.createRelationship(RELATION_NAME1, c1, c2, CardinalityType.MANY, OptionalityType.OPTIONAL, CardinalityType.MANY, OptionalityType.OPTIONAL, true);
+//				r.s
+//				database.createInfoAttribute(r, "Strasse", AttributeType.STRING);
+//				database.createInfoAttribute(r, "PLZ", AttributeType.STRING);
+//				database.createInfoAttribute(r, "Ort", AttributeType.STRING);
+			}
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			database.endTransaction();
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		OClass tc2 = ((OrientGraph) database.getRawDatabase()).getVertexType("meta.InfoObject");
-//		OClass tc3 = ((OrientGraph) database.getRawDatabase()).getVertexType("test.TestClass3");
-		assertEquals("meta.InfoObject", tc2.getName());
-//		assertEquals("test.TestClass3", tc3.getName());
-//		assertEquals("de.pch.frames.test.TestClass1", tc3.getClass().getSuperclass().getCanonicalName());
-//		assertEquals("test.TestClass1", tc2.getSuperClass().getName());
-//		assertEquals("test.TestClass1", tc3.getSuperClass().getName());
+		assertEquals(CLASS_NAME2, r.getName());
 	}
-
 }

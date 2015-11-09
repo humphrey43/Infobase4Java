@@ -60,6 +60,8 @@ public class Test000 extends InfobaseTest0 {
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
 		System.out.println("test000: Löschen der Datenbank");
+		database.clearMetadata();
+		database.createMetadata();
 //		System.out.println(AttributeType.LANGUAGE_STRING.toString());
 //		((InfoDatabaseOrientDB) database).clearMetadata();
 //		((InfoDatabaseOrientDB) database).dropVertexType(CLASS_NAME1);

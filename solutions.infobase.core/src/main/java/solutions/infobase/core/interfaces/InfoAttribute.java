@@ -14,4 +14,5 @@ public interface InfoAttribute extends InfoObject {
 	void setDesignation(String designation);
 	String getDescription();
 	void setDescription(String description);
+	void setTypeDirect(AttributeType type);
 }

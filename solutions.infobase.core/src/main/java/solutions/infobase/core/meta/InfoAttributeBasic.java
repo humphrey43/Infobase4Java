@@ -2,6 +2,7 @@ package solutions.infobase.core.meta;
 
 import solutions.infobase.core.Infobase;
 import solutions.infobase.core.Infobase.AttributeType;
+import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.interfaces.InfoAttribute;
 import solutions.infobase.core.interfaces.InfoClass;
 import solutions.infobase.core.interfaces.InfoDatabase;
@@ -54,13 +55,18 @@ public class InfoAttributeBasic extends InfoObjectBasic implements InfoAttribute
 	}
 
 	@Override
+	public void setTypeDirect(AttributeType type) {
+		this.type = type;
+	}
+
+	@Override
 	public String getName() {
-		return getString(Infobase.ATTRIBUTE_NAME);
+		return (String) getValueDirect(Infobase.ATTRIBUTE_NAME);
 	}
 
 	@Override
 	public void setName(String name) {
-		setValue(Infobase.ATTRIBUTE_NAME, name);
+		setValueDirect(Infobase.ATTRIBUTE_NAME, name);
 	}
 	
 	@Override

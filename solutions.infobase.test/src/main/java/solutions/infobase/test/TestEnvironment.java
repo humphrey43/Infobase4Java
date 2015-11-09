@@ -14,16 +14,17 @@ import solutions.infobase.core.interfaces.InfoDatabaseFactory;
 
 public class TestEnvironment {
 
-	static InfoDatabase database = null;
+//	static InfoDatabase database = null;
 	
-	public static InfoDatabase getDatabase() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigurationException {
-		if (database == null) {
+	public static InfoDatabase getDatabase2() throws InstantiationException, IllegalAccessException, ClassNotFoundException, ConfigurationException {
+		InfoDatabase database = null;
+//		if (database == null) {
 				try {
 					database = Infobase.getDatabase("test");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-		}
+//		}
 		return database;
 	}
 	
@@ -45,24 +46,24 @@ public class TestEnvironment {
 		}
 	}
 	
-	public static void finish() {
-		if (database != null) {
-			try {
-				database.close();
-			} catch (InfobaseDatabaseRuntimeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		database = null;
-	}
-
-	public static InfoDatabase getEmptyDatabase() {
-		try {
-			database = Infobase.getEmptyDatabase("test");
-		} catch (InfobaseDatabaseException e) {
-			e.printStackTrace();
-		}
-		return database;
-	}
+//	public static void finish() {
+//		if (database != null) {
+//			try {
+//				database.close();
+//			} catch (InfobaseDatabaseRuntimeException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		database = null;
+//	}
+//
+//	public static InfoDatabase getEmptyDatabase() {
+//		try {
+//			database = Infobase.getEmptyDatabase("test");
+//		} catch (InfobaseDatabaseException e) {
+//			e.printStackTrace();
+//		}
+//		return database;
+//	}
 }

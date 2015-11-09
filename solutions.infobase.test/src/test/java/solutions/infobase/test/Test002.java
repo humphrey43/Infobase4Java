@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import solutions.infobase.core.Infobase.AttributeType;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.interfaces.InfoClass;
 
@@ -61,9 +62,15 @@ public class Test002 extends InfobaseTest {
 
 	@Test
 	@TestSequence(01)
-	public void test() {
-		System.out.println("test002");
+	public void test01() {
+		System.out.println("test002_01");
 		InfoClass c = null;
+		try {
+			database.startTransaction();
+		} catch (InfobaseDatabaseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			c = database.getInfoClass(CLASS_NAME1);
 		} catch (InfobaseDatabaseException e) {
@@ -71,7 +78,15 @@ public class Test002 extends InfobaseTest {
 		try {
 			if (c == null) {
 				c = database.createInfoClass(CLASS_NAME1, database.getInfoClass("InfoObject"));
+				database.createInfoAttribute(c, "Name", AttributeType.STRING);
+				database.createInfoAttribute(c, "Alter", AttributeType.INTEGER);
 			}
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			database.endTransaction();
 		} catch (InfobaseDatabaseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -85,6 +100,40 @@ public class Test002 extends InfobaseTest {
 //		assertEquals("de.pch.frames.test.TestClass1", tc3.getClass().getSuperclass().getCanonicalName());
 //		assertEquals("test.TestClass1", tc2.getSuperClass().getName());
 //		assertEquals("test.TestClass1", tc3.getSuperClass().getName());
+	}
+	@Test
+	@TestSequence(02)
+	public void test02() {
+		System.out.println("test002_02");
+		InfoClass c = null;
+		try {
+			database.startTransaction();
+		} catch (InfobaseDatabaseException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			c = database.getInfoClass(CLASS_NAME2);
+		} catch (InfobaseDatabaseException e) {
+		}
+		try {
+			if (c == null) {
+				c = database.createInfoClass(CLASS_NAME2, database.getInfoClass("InfoObject"));
+				database.createInfoAttribute(c, "Strasse", AttributeType.STRING);
+				database.createInfoAttribute(c, "PLZ", AttributeType.STRING);
+				database.createInfoAttribute(c, "Ort", AttributeType.STRING);
+			}
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			database.endTransaction();
+		} catch (InfobaseDatabaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		assertEquals(CLASS_NAME2, c.getName());
 	}
 
 }

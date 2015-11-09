@@ -8,12 +8,13 @@
 		<password>admin</password>
 		<minPool>1</minPool>
 		<maxPool>3</maxPool>
+		<admin>true</admin>
 		<databaseFactory>solutions.infobase.orientdb.InfoDatabaseFactoryOrientDB</databaseFactory>
 		<objectFactory>solutions.infobase.test.TestObjectFactory</objectFactory>
 		<classes>
 			<class><name>TestClass1</name><full>solutions.infobase.test.TestClass1</full></class>
 			<class><name>TestClass2</name><full>solutions.infobase.test.TestClass2</full></class>
 			<class><name>TestClass3</name><full>solutions.infobase.test.TestClass3</full></class>
-			</classes>
+		</classes>
 	</dbconfig>
 </configuration>

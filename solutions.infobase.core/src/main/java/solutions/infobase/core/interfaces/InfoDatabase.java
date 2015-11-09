@@ -3,8 +3,12 @@ package solutions.infobase.core.interfaces;
 import java.util.List;
 import java.util.Map;
 
+import solutions.infobase.core.Infobase.AttributeType;
+import solutions.infobase.core.Infobase.CardinalityType;
+import solutions.infobase.core.Infobase.OptionalityType;
 import solutions.infobase.core.exceptions.InfobaseDatabaseException;
 import solutions.infobase.core.exceptions.InfobaseDatabaseRuntimeException;
+import solutions.infobase.core.exceptions.InfobaseException;
 
 /**
  * @author hardy
@@ -17,8 +21,8 @@ public interface InfoDatabase {
 	 *
 	 *	database information
 	 */
-	public String getDatabaseName();
-	public Object getRawDatabase();
+	String getDatabaseName();
+	Object getRawDatabase();
 	
 	/**
 	 * @author hardy
@@ -31,58 +35,58 @@ public interface InfoDatabase {
 	 *
 	 *	open
 	 */
-	public void open() throws InfobaseDatabaseException;
-	public boolean isOpen();
+	void open() throws InfobaseDatabaseException;
+	boolean isOpen();
 
 	/**
 	 * @author hardy
 	 *
 	 *	startTransaction
 	 */
-	public void startTransaction() throws InfobaseDatabaseException;
+	void startTransaction() throws InfobaseDatabaseException;
 
 	/**
 	 * @author hardy
 	 *
 	 *	setError
 	 */
-	public void setError();
+	void setError();
 	 
 	/**
 	 * @author hardy
 	 *
 	 *	setError(Exception e)
 	 */
-	public void setError(Exception e);
+	void setError(Exception e);
 	 
 	/**
 	 * @author hardy
 	 *
 	 *	commit
 	 */
-	public void commit() throws InfobaseDatabaseException;
+	void commit() throws InfobaseDatabaseException;
 	 
 	/**
 	 * @author hardy
 	 *
 	 *	rollback
 	 */
-	public void rollback() throws InfobaseDatabaseException;
+	void rollback() throws InfobaseDatabaseException;
 	
 	/**
 	 * @author hardy
 	 *
 	 *	endTransaction
 	 */
-	public void endTransaction() throws InfobaseDatabaseException;
+	void endTransaction() throws InfobaseDatabaseException;
 	
 	/**
 	 * @author hardy
 	 *
 	 *	close
 	 */
-	public void close() throws InfobaseDatabaseRuntimeException;
-	public boolean isClosed();
+	void close() throws InfobaseDatabaseRuntimeException;
+	boolean isClosed();
 
 	/**
 	 * @author hardy
@@ -90,17 +94,31 @@ public interface InfoDatabase {
 	 *	Access to the database
 	 */
 
-	public InfoClass getInfoClass(String classname) throws InfobaseDatabaseException;
-	
-	public InfoClass readInfoClass(String classname) throws InfobaseDatabaseException;
-	public InfoClass createInfoClass(String classname, InfoClass superclass) throws InfobaseDatabaseException;
-	public void save(InfoObject infoObject);
-	public InfoObject newInfoObject(InfoClass infoClass);
-	public Object getValue(Object rawObject, String name);
-	public void setValue(Object rawObject, String name, Object value);
-	public List<InfoObject> queryObjects(String query) throws InfobaseDatabaseException;
-	public InfoObject queryObject(String query) throws InfobaseDatabaseException;
-	public List<InfoAttribute> readAttributes(String classname) throws InfobaseDatabaseException;
-	public void assertMetadata() throws InfobaseDatabaseException;
-	public void clearMetadata() throws InfobaseDatabaseException;
+	InfoClass getInfoClass(String classname) throws InfobaseDatabaseException;
+	InfoClass getInfoClassId(String infoId) throws InfobaseDatabaseException;
+	InfoClass readInfoClass(String classname) throws InfobaseDatabaseException;
+	InfoClass readInfoClassId(String infoId) throws InfobaseDatabaseException;
+	InfoClass createInfoClass(String classname, InfoClass superclass) throws InfobaseDatabaseException;
+
+	InfoAttribute createInfoAttribute(InfoClass infoclass, String name, AttributeType type) throws InfobaseDatabaseException;
+
+	void save(InfoObject infoObject);
+	InfoObject newInfoObject(InfoClass infoClass);
+	InfoObject newInfoObject(String infoClassName) throws InfobaseException;
+	Object getValue(Object rawObject, String name);
+	void setValue(Object rawObject, String name, Object value);
+	List<InfoObject> queryObjects(String query) throws InfobaseDatabaseException;
+	InfoObject queryObject(String query) throws InfobaseDatabaseException;
+//	public List<InfoAttribute> readAttributes(String classname) throws InfobaseDatabaseException;
+	void assertMetadata() throws InfobaseDatabaseException;
+	void clearMetadata() throws InfobaseDatabaseException;
+	void createMetadata() throws InfobaseDatabaseException;
+	List<InfoAttribute> readAttributes(InfoClass infoclass) throws InfobaseDatabaseException;
+	String getInfoId(Object rawObject);
+	InfoClass getClassFrom(InfoRelationship relationship);
+	InfoClass getClassFrom(InfoRelationship relationship, InfoClass start);
+	InfoClass getClassTo(InfoRelationship relationship);
+	InfoClass getClassTo(InfoRelationship relationship, InfoClass start);
+	InfoRelationship getRelationship(String relationName) throws InfobaseDatabaseException;
+	InfoRelationship createRelationship(String relationName, InfoClass c1, InfoClass c2, CardinalityType cardinalityFrom, OptionalityType optionalityFrom, CardinalityType cardinalityTo, OptionalityType optionalityTo, boolean directional) throws InfobaseDatabaseException;
 }
