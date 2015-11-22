@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <configuration>
-	<dbconfig>
-		<url>memory:demo</url>
+	<dbconfig name="test">
+		<url1>memory:demo</url1>
+		<url>remote:localhost/TestDB</url>
+		<url2>remote:localhost/GratefulDeadConcerts</url2>
 		<userid>admin</userid>
 		<password>admin</password>
-		<databaseFactory>solutions.infobase.orientdb.InfobaseDatabaseFactoryOrientDB</databaseFactory>
-		<documentFactory>solutions.infobase.orientdb.InfobaseDocumentFactoryOrientDB</documentFactory>
+		<minPool>1</minPool>
+		<maxPool>3</maxPool>
+		<admin>true</admin>
+		<databaseFactory>solutions.infobase.orientdb.InfoDatabaseFactoryOrientDB</databaseFactory>
+		<objectFactory>solutions.infobase.test.TestObjectFactory</objectFactory>
+		<classes>
+			<class><name>TestClass1</name><full>solutions.infobase.test.TestClass1</full></class>
+			<class><name>TestClass2</name><full>solutions.infobase.test.TestClass2</full></class>
+			<class><name>TestClass3</name><full>solutions.infobase.test.TestClass3</full></class>
+		</classes>
 	</dbconfig>
 </configuration>
