@@ -19,6 +19,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Workspace/DeltaOnline4.3/Javalibs/TEST/com.airbus.junit.jar"/>
+	<classpathentry kind="lib" path="C:/Workspace/Tinkerpop/Javalibs/ext/com.airbus.junit.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
