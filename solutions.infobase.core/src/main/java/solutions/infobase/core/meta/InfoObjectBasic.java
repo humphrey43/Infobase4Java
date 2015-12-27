@@ -117,6 +117,19 @@ public class InfoObjectBasic implements InfoObject {
 	}
 	
 	@Override
+	public long getLong(String name) {
+		return getLong(name, 0);
+	}
+	
+	@Override
+	public long getLong(String name, long defaultValue) {
+		long erg = defaultValue;
+		Object o = getValue(name);
+		if (o != null) erg = ((Long) o).longValue();
+		return erg;
+	}
+	
+	@Override
 	public Object getValueDirect(String name) {
 		return database.getValue(rawObject, name);
 	}

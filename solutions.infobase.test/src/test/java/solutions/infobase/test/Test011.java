@@ -58,17 +58,18 @@ public class Test011 extends InfobaseTest {
 	@TestSequence(01)
 	public void test() throws InfobaseDatabaseException {
 		System.out.println("test011");
-		InfoClass class1;
 		InfoObject test1;
 		database.startTransaction();
 		try {
-			List<InfoObject> result = database.queryObjects("SELECT FROM " + CLASS_NAME1);
-			int j= 42;
+			test1 = database.newInfoObject(CLASS_NAME2);
+			test1.setValue("Strasse",  "Gasse 4");
+			test1.setValue("PLZ",  "45664");
+			test1.setValue("Ort",  "Dörflein");
+			test1.save();
 		} catch(Exception e) {
 			int i = 42;
 		}
 		database.endTransaction();
-		class1 = database.getInfoClass("Test1Class");
 //		test1 = class1.newObject();
 //		test1.setValue("name", "Hardy");
 //		test1.save();

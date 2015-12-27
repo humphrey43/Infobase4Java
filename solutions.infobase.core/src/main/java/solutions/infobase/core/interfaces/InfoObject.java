@@ -20,4 +20,6 @@ public interface InfoObject {
 	String getString(String name);
 	
 	void save();
+	long getLong(String name);
+	long getLong(String name, long defaultValue);
 }
